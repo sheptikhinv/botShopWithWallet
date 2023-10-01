@@ -1,1 +1,1 @@
-from .MakeProduct import MakeProduct
+from .make_product import MakeProduct

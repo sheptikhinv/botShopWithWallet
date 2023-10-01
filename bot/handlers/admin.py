@@ -3,8 +3,10 @@ from aiogram.filters.command import Command
 from aiogram.fsm.context import FSMContext
 
 from bot.filters import DoesAdminExist, IsAdmin
+from bot.keyboards import list_of_products, change_status
+from bot.misc import create_new_product, format_product_for_admin
 from bot.states import MakeProduct
-from database import User
+from database import User, Product
 
 router = Router(name="admin")
 
@@ -18,6 +20,7 @@ async def set_admin(message: types.Message):
 
 @router.message(Command("create"), IsAdmin())
 async def add_product(message: types.Message, state: FSMContext):
+    await state.update_data(product_created_by=message.from_user.id)
     await message.answer(
         'Создаём новое объявление!\nВ любой момент вы можете отправить "/cancel", чтоб прекратить создание товара\nВведите название товара:')
     await state.set_state(MakeProduct.setting_title)
@@ -84,6 +87,7 @@ async def file_id_added(message: types.Message, state: FSMContext):
 @router.message(MakeProduct.setting_file_id, Command("finish"), IsAdmin())
 async def preview_product(message: types.Message, state: FSMContext, with_photo: bool = False):
     user_data = await state.get_data()
+    product_link = await create_new_product(user_data)
     if with_photo:
         await message.answer_photo(
             photo=user_data["product_file_id"],
@@ -96,17 +100,45 @@ async def preview_product(message: types.Message, state: FSMContext, with_photo:
         await message.answer(
             f"{user_data['product_title']}\n\n"
             f"{user_data['product_description']}\n\n"
-            f"Цена: {user_data['product_price']} {user_data['product_currency_code']}\n"
-            f"Тираж: {user_data['product_amount']}"
+            f"Price: {user_data['product_price']} {user_data['product_currency_code']}\n"
+            f"Edition: {user_data['product_amount']}"
         )
+    await message.answer(f"Ссылка на объявление: t.me/{(await message.bot.get_me()).username}?start={product_link}")
 
-
-## TODO: СДЕЛАТЬ СОЗДАНИЕ ССЫЛКИ НА ТОВАР
 
 @router.message(Command("cancel"), IsAdmin())
 async def cancel_creation(message: types.Message, state: FSMContext):
     await message.answer("Хорошо, отменяем создание товара!")
     await state.clear()
+
+
+@router.message(Command("products"), IsAdmin())
+async def get_products_by_admin(message: types.Message):
+    await message.answer(
+        text="Вот все товары:",
+        reply_markup=list_of_products(is_admin=True)
+    )
+
+
+@router.callback_query(F.data.contains("get"), IsAdmin())
+async def get_product_for_admin(callback_query: types.CallbackQuery):
+    link = callback_query.data.split()[2]
+    product = Product.get_by_link(link)
+    text = await format_product_for_admin((await callback_query.bot.get_me()).username, product)
+    reply_markup = change_status(product)
+    if product.file_id is not None:
+        await callback_query.message.answer_photo(caption=text, photo=product.file_id, reply_markup=reply_markup)
+    else:
+        await callback_query.message.answer(text=text, reply_markup=reply_markup)
+
+
+@router.callback_query(F.data.contains("change_status"), IsAdmin())
+async def change_status_by_admin(callback_query: types.CallbackQuery):
+    link = callback_query.data.split()[2]
+    product = Product.get_by_link(link)
+    product.change_status()
+    text = await format_product_for_admin((await callback_query.bot.get_me()).username, product)
+    await callback_query.message.edit_text(text=text, reply_markup=callback_query.message.reply_markup)
 
 
 def register_admin_handlers(dp: Dispatcher):

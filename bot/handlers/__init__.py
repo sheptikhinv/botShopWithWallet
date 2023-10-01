@@ -1,2 +1,3 @@
-from .messages import register_message_handlers
+from .user_messages import register_message_handlers
 from .admin import register_admin_handlers
+from .user_callback import register_callback_handlers
