@@ -1,1 +1,1 @@
-from .inline import list_of_products, change_status
+from .inline import list_of_products, admin_buttons, user_buttons

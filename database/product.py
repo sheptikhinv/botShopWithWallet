@@ -140,6 +140,7 @@ class Product:
         finally:
             if db_connection:
                 db_connection.close()
+            if result:
                 return Product(title=result[0], description=result[1], amount=result[2], price=result[3],
                                currency_code=result[4], created_by=result[5], status=result[6], link=result[7],
                                file_id=result[8])
@@ -149,7 +150,12 @@ class Product:
         if self.status == "active":
             self.change_cell("status", "inactive")
             self.status = "inactive"
-        else:
+        elif self.status == "inactive":
             self.change_cell("status", "active")
             self.status = "active"
         return True
+
+    def delete_product(self):
+        self.change_cell("status", "deleted")
+        return True
+

@@ -44,3 +44,9 @@ async def format_product(product: Product):
             f"Left: {product.amount}\n")
 
     return text
+
+
+def status_to_circle(status: string):
+    if status == "active": return "🟢"
+    if status == "inactive": return "🔴"
+    return ""
