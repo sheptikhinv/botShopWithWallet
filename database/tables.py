@@ -18,6 +18,7 @@ def create_tables():
                     file_id       TEXT
                 );"""
     cursor.execute(query)
+
     query = """CREATE TABLE if NOT EXISTS users
                 (
                     user_id    integer not null,
@@ -25,6 +26,20 @@ def create_tables():
                     first_name TEXT    not null
                 );"""
     cursor.execute(query)
+
+    query = """CREATE TABLE if NOT EXISTS orders
+                (
+                    external_id   TEXT    not null,
+                    order_id      TEXT    not null,
+                    title         TEXT    not null,
+                    product_link  TEXT    not null,
+                    user_id       integer not null,
+                    price         integer not null,
+                    currency_code TEXT    not null,
+                    status        TEXT    not null
+                );"""
+    cursor.execute(query)
+
     db_connection.commit()
     cursor.close()
     if db_connection:

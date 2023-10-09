@@ -41,12 +41,9 @@ async def format_product(product: Product):
     text = (f"{product.title}\n\n"
             f"{product.description}\n\n"
             f"Price: {product.price} {product.currency_code}\n"
-            f"Left: {product.amount}\n")
+            f"Left: {product.amount}\n\n"
+            f"Please make your selection carefully before ordering\n"
+            f"Analog photography is a unique product and cannot be returned!\n"
+            f"After payment, the photo is securely packaged and sent by mail within 7 days; other shipping options are discussed in person by correspondence.")
 
     return text
-
-
-def status_to_circle(status: string):
-    if status == "active": return "🟢"
-    if status == "inactive": return "🔴"
-    return ""

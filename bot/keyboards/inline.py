@@ -1,8 +1,13 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from bot.misc import status_to_circle
+from database import User
 from database.product import Product
 
+
+def status_to_circle(status: str):
+    if status == "active": return "🟢"
+    if status == "inactive": return "🔴"
+    return ""
 
 def list_of_products(is_admin: bool):
     products = Product.get_all_products()
@@ -38,7 +43,7 @@ def admin_buttons(product: Product):
                                                   callback_data=f"product change_currency {product.link}")
     change_amount_button = InlineKeyboardButton(text="Change amount",
                                                 callback_data=f"product change_amount {product.link}")
-    change_file_id_button = InlineKeyboardButton(text = "Change photo",
+    change_file_id_button = InlineKeyboardButton(text="Change photo",
                                                  callback_data=f"product change_file_id {product.link}")
     delete_product_button = InlineKeyboardButton(text="DELETE PRODUCT",
                                                  callback_data=f"product delete {product.link}")
@@ -48,3 +53,18 @@ def admin_buttons(product: Product):
         [change_price_button, change_currency_button],
         [change_amount_button, change_file_id_button],
         [delete_product_button]])
+
+
+def contact_button():
+    contact = InlineKeyboardButton(text="Contact seller", url=f"tg://user?id={User.get_all_admins_ids()[0]}")
+    return InlineKeyboardMarkup(inline_keyboard=[[contact]])
+
+
+def contact_user_button(user_id: int):
+    contact = InlineKeyboardButton(text="Contact user", url=f"tg://user?id={user_id}")
+    return InlineKeyboardMarkup(inline_keyboard=[[contact]])
+
+
+def empty_button():
+    empty = InlineKeyboardButton(text = "Pay your order in next message", callback_data="pay pay pay")
+    return InlineKeyboardMarkup(inline_keyboard=[[empty]])

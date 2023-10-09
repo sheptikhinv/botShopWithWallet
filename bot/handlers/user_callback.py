@@ -1,7 +1,8 @@
 from aiogram import Router, F, types, Dispatcher
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from bot.keyboards import user_buttons
-from bot.misc import format_product
+from bot.keyboards import user_buttons, contact_button, empty_button
+from bot.misc import format_product, create_new_order
 from database import Product
 
 router = Router(name="user_callback")
@@ -17,16 +18,23 @@ async def get_product_by_user(callback_query: types.CallbackQuery):
         await callback_query.message.answer_photo(caption=text, photo=product.file_id, reply_markup=reply_markup)
     else:
         await callback_query.message.answer(text=text, reply_markup=reply_markup)
+    await callback_query.answer()
 
 
 @router.callback_query(F.data.contains("buy"))
 async def create_order(callback_query: types.CallbackQuery):
     link = callback_query.data.split()[2]
     product = Product.get_by_link(link)
-    await callback_query.message.answer(f"You gonna buy:\n"
+    #order = await create_new_order(product, callback_query.from_user.id)
+    await callback_query.message.answer(text=f"You gonna buy:\n"
                                         f"Product: {product.title}\n"
                                         f"Price: {product.price} {product.currency_code}\n\n"
-                                        f"Вот тут должна быть кнопка на оплату через WalletAPI")
+                                        f"Вот тут должна быть кнопка на оплату через WalletAPI") # КНОПКА НА ОПЛАТУ СДЕЛАТЬ
+    if callback_query.message.photo:
+        await callback_query.message.edit_caption(caption=callback_query.message.caption, reply_markup=empty_button())
+    else:
+        await callback_query.message.edit_text(text=callback_query.message.text, reply_markup=empty_button())
+    await callback_query.answer()
 
 
 def register_callback_handlers(dp: Dispatcher):
