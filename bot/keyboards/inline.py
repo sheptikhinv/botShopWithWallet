@@ -9,6 +9,7 @@ def status_to_circle(status: str):
     if status == "inactive": return "🔴"
     return ""
 
+
 def list_of_products(is_admin: bool):
     products = Product.get_all_products()
     buttons = []
@@ -66,5 +67,10 @@ def contact_user_button(user_id: int):
 
 
 def empty_button():
-    empty = InlineKeyboardButton(text = "Pay your order in next message", callback_data="pay pay pay")
+    empty = InlineKeyboardButton(text="Pay your order in next message", callback_data="pay pay pay")
     return InlineKeyboardMarkup(inline_keyboard=[[empty]])
+
+
+def pay_button(link: str):
+    pay = InlineKeyboardButton(text="Pay", url=link)
+    return InlineKeyboardMarkup(inline_keyboard=[[pay]])

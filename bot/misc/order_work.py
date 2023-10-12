@@ -42,15 +42,21 @@ async def checking_and_finishing_order(order: OrderPreview, callback_query: Call
     while order_preview.status == "ACTIVE":
         order_preview = await api.get_order_preview(order_id=order.id)
         if order_preview.status == "PAID":
-            product.change_cell("amount", product.amount - 1)
+            product = product.change_cell("amount", product.amount - 1)
+            if product.amount < 1:
+                product.change_status()
             await callback_query.message.answer(text="Thanks for buying!\nPlease, contact seller for delivery options",
                                                 reply_markup=contact_button())
             await callback_query.bot.send_message(chat_id=User.get_all_admins_ids()[0],
                                                   text=f"User {callback_query.from_user.first_name} just bought {product.title}.",
                                                   reply_markup=contact_user_button(callback_query.from_user.id))
+            break
         if order_preview.status == "EXPIRED":
             await callback_query.message.answer("Order expired.")
+            break
         if order_preview.status == "CANCELLED":
             await callback_query.message.answer("Order has been cancelled.")
+            break
         order_obj.change_cell("status", order_preview.status)
         await asyncio.sleep(30)
+    order_obj.change_cell("status", order_preview.status)

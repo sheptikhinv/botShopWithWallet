@@ -44,7 +44,7 @@ class Order:
             db_connection = sqlite3.connect("database.db")
             cursor = db_connection.cursor()
 
-            query = "INSET INTO orders (external_id, order_id, title, product_link, user_id, price, currency_code, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
+            query = "INSERT INTO orders (external_id, order_id, title, product_link, user_id, price, currency_code, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
             data = (self.external_id, self.order_id, self.title, self.product_link, self.user_id, self.price,
                     self.currency_code, self.status)
             cursor.execute(query, data)
@@ -64,7 +64,7 @@ class Order:
             db_connection = sqlite3.connect("database.db")
             cursor = db_connection.cursor()
 
-            query = "UPDATE orders SET {column} = ? WHERE external_id = ?"
+            query = f"UPDATE orders SET {column} = ? WHERE external_id = ?"
             data = (new_value, self.external_id)
 
             cursor.execute(query, data)
